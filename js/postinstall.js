@@ -5,7 +5,9 @@ const fetch = require('node-fetch')
 const { version } = require('./package.json')
 const { errorHandler, checkSum, untar, downloadFile, findGitRoot, createFolderIfNotExists, createFileIfNotExists, updateFile } = require('./')
 
-if (fs.existsSync(path.join(__dirname, '..', '..', 'package.json'))) {
+console.info(path.resolve(path.join(__dirname, '..', 'package.json')))
+
+if (fs.existsSync(path.join(__dirname, '..', 'package.json'))) {
   console.warn('Skipping ccc installation as this is not a root dependency')
   process.exit(0)
 }
