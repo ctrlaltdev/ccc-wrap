@@ -7,8 +7,12 @@
     "test": "exit 0",
     "postinstall": "node postinstall.js"
   },
-  "author": "",
+  "author": "Yorick Demichelis <yorick@ctrlalt.dev>",
   "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ctrlaltdev/ccc-wrap.git"
+  },
   "dependencies": {
     "node-fetch": "^2.6.1"
   }

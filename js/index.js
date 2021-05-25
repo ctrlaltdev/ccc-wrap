@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const crypto = require('crypto')
 const { exec } = require('child_process')
 
@@ -39,9 +40,48 @@ const untar = async (path) => {
   })
 }
 
+const findGitRoot = (dir = __dirname) => {
+  const p = path.resolve(dir).split(path.sep)
+  if (fs.existsSync(path.resolve(p.join(path.sep), '.git'))) {
+    return dir
+  }
+  const next = p.slice(0, -1)
+  if (next.length === 1 && next[0] === '') return null
+  return findGitRoot(path.resolve(next.join(path.sep)))
+}
+
+const createFolderIfNotExists = (dir, mode = 0744) => {
+  if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir, mode)
+    return true
+  }
+  return false
+}
+
+const createFileIfNotExists = (filepath, mode = 0744) => {
+  if (!fs.existsSync(filepath)){
+    fs.writeFileSync(filepath, '', { mode })
+    return true
+  }
+  return false
+}
+
+const updateFile = (filepath, content) => {
+  const data = fs.readFileSync(filepath).toString()
+  if (data.indexOf(content) === -1) {
+    fs.writeFileSync(filepath, data + '\n' + content)
+    return true
+  }
+  return false
+}
+
 module.exports = {
   errorHandler,
   downloadFile,
   checkSum,
-  untar
+  untar,
+  findGitRoot,
+  createFolderIfNotExists,
+  createFileIfNotExists,
+  updateFile
 }

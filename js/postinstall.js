@@ -3,7 +3,7 @@ const path = require('path')
 const fetch = require('node-fetch')
 
 const { version } = require('./package.json')
-const { errorHandler, checkSum, untar, downloadFile } = require('./')
+const { errorHandler, checkSum, untar, downloadFile, findGitRoot, createFolderIfNotExists, createFileIfNotExists, updateFile } = require('./')
 
 if (fs.existsSync(path.join(__dirname, '..', '..', 'package.json'))) {
   console.warn('Skipping ccc installation as this is not a root dependency')
@@ -35,17 +35,35 @@ const main = async () => {
   const shaURL = url + '.sha256'
   
   try {
-    const binRes = await fetch(url)
-    await downloadFile(path.join(__dirname, archive), binRes)
+    if (!fs.existsSync(path.join(__dirname, 'ccc'))) {
+      const binRes = await fetch(url)
+      await downloadFile(path.join(__dirname, archive), binRes)
 
-    const shasum = await fetch(shaURL).then(r => r.text()).then(r => r.split(' ')[0])
+      const shasum = await fetch(shaURL).then(r => r.text()).then(r => r.split(' ')[0])
 
-    const sumChecked = await checkSum(path.join(__dirname, archive), shasum)
-    if (!sumChecked) {
-      throw new Error('We couldn\'t verify the integrity of the file.')
+      const sumChecked = await checkSum(path.join(__dirname, archive), shasum)
+      if (!sumChecked) {
+        throw new Error('We couldn\'t verify the integrity of the file.')
+      }
+
+      await untar(path.join(__dirname, archive))
+      fs.unlinkSync(path.join(__dirname, archive))
     }
 
-    await untar(path.join(__dirname, archive))
+    const dir = findGitRoot()
+    if (!dir) {
+      throw new Error('No git repository found in parent folders.')
+    }
+
+    const hooksdir = path.join(dir, '.git', 'hooks')
+    const hookfile = path.join(hooksdir, 'commit-msg')
+
+    createFolderIfNotExists(hooksdir)
+    createFileIfNotExists(hookfile, 0755)
+    
+    const cmd = `./${path.relative(dir, path.resolve(path.join(__dirname, 'ccc')))} $@\n`
+
+    updateFile(hookfile, cmd)
   } catch (e) {
     errorHandler(e)
   }
