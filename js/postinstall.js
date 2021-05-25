@@ -45,7 +45,9 @@ const main = async () => {
 
       const sumChecked = await checkSum(path.join(__dirname, archive), shasum)
       if (!sumChecked) {
-        throw new Error('We couldn\'t verify the integrity of the file.')
+        fs.unlinkSync(path.join(__dirname, archive))
+        console.warn('We couldn\'t verify the integrity of the file. Stopping ccc binary installation for security reasons.')
+        process.exit(0)
       }
 
       await untar(path.join(__dirname, archive))
@@ -54,7 +56,8 @@ const main = async () => {
 
     const dir = findGitRoot()
     if (!dir) {
-      throw new Error('No git repository found in parent folders.')
+      console.warn('No git repository found in parent folders. Skipping hook installation.')
+      process.exit(0)
     }
 
     const hooksdir = path.join(dir, '.git', 'hooks')
