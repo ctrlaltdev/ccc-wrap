@@ -1,6 +1,6 @@
 # Wrapper for Conventional Commit Checker
 
-[Conventional Commit Checker](/ctrlaltdev/ccc)
+[Conventional Commit Checker](https://github.com/ctrlaltdev/ccc)
 
 The purpose of this repo is to provide language specific packages that will download the right CCC binary and add it as a git hook to check the format of the commit.
 
